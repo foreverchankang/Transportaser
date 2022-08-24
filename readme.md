@@ -1,3 +1,3 @@
-This is our first project\n
-We will make the best watch\n
+This is our first project
+We will make the best watch
 Do the best
