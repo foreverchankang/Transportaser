@@ -19,9 +19,8 @@ from flet import (
     icons,
     Checkbox,
     Image,
-
+    ElevatedButton
 )
-
 
 # Write main app code here
 # def mainApp(UserControl):
@@ -32,6 +31,7 @@ def main(page: Page):
     page.bgcolor = "#253439"
     page.update()
 
+    page.add()
     Block = Text(
         "Size 50, Normal",
         size=50,
@@ -88,7 +88,11 @@ def main(page: Page):
     # page.add(app)
 
 
+
+flet.app(target=main)
+=======
 flet.app(
     target=main,
     assets_dir=f"assets"
 )
+
