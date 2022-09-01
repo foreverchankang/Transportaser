@@ -1,4 +1,5 @@
 import flet
+from time import sleep
 from flet import (
     Column,
     Page,
@@ -19,7 +20,8 @@ from flet import (
     icons,
     Checkbox,
     Image,
-    ElevatedButton
+    ElevatedButton,
+    ProgressRing,
 )
 
 
@@ -32,7 +34,7 @@ def main(page: Page):
     page.bgcolor = "#253439"
     page.update()
 
-    Title = Container(
+    title = Container(
         content=Text(
             "Transportaser",
             size=70,
@@ -41,14 +43,14 @@ def main(page: Page):
         margin=margin.only(top=50)
     )
 
-    Img = Image(
+    img = Image(
         src=f"images/lightning_icon1.png",
         width=200,
         height=200,
         fit="contain",
     )
 
-    Body = Container(
+    body_connect = Container(
         content=Text(
             "Connect Device",
             size=40,
@@ -56,7 +58,15 @@ def main(page: Page):
             weight="normal")
     )
 
-    Pair_button = Container(
+    body_connecting = Container(
+        content=Text(
+            "Connecting...",
+            size=40,
+            color=colors.WHITE,
+            weight="normal")
+    )
+
+    pair_button = Container(
         content=Text("Pair",
                      size=25,
                      color="#253439",
@@ -67,13 +77,17 @@ def main(page: Page):
         width=140,
         height=35,
         border_radius=20,
-        on_click=lambda e: print("Pairing, please wait. "),
+        on_click=lambda e: (page.remove(body_connect, pair_button), page.add(body_connecting, pr)),
         margin=margin.only(top=30),
         )
 
-    page.add(Title, Img, Body, Pair_button)
+    page.add(title, img, body_connect, pair_button)
 
-flet.app(
-    target=main,
-    assets_dir=f"assets"
-)
+    pr = ProgressRing(width=35, height=35, stroke_width=10)
+    for i in range(0, 101):
+        pr.value = i * 0.01
+        sleep(0.05)
+        page.update()
+
+
+flet.app(target=main, assets_dir=f"assets")
