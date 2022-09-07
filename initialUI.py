@@ -113,7 +113,7 @@ class InitialPage(UserControl):
         super().update()
 
 
-class DropdownMenu(UserControl):
+class StationsDropdownMenu(UserControl):
     def __init__(self):
         super().__init__()
         self.rtn_display = Column()
