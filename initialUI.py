@@ -23,8 +23,11 @@ from flet import (
     ElevatedButton,
     ProgressRing,
     ProgressBar,
+    Dropdown,
+    dropdown
 )
 
+'''
 
 class InitialPage(UserControl):
     def __init__(self):
@@ -41,7 +44,7 @@ class InitialPage(UserControl):
                 "Transportaser",
                 size=70,
                 color=colors.WHITE,
-                weight="normal"),
+                weight="bold"),
             margin=margin.only(top=50)
         )
 
@@ -111,12 +114,80 @@ class InitialPage(UserControl):
 
     def update(self):
         super().update()
+'''
 
 
 class DropdownMenu(UserControl):
     def __init__(self):
         super().__init__()
-        self.rtn_display = Column()
+        self.title = None
+        self.txt_pick = None
+        self.dropdownObj = None
+        
+        self.rtn_display = None
+
+    def build(self):
+        self.title = Container(
+            content=Text(
+                "Transportaser",
+                size=70,
+                color=colors.WHITE,
+                weight="bold"),
+            margin=margin.only(top=30)
+        )
+
+        self.txt_pick = Container(
+            content=Text(
+                "Pick 4",
+                size=20,
+                color=colors.WHITE,
+                weight='normal'),
+            margin=margin.only(top=10, bottom=10)
+        )
+
+        self.dropdownObj = Container(
+            content=Row(
+                controls=[
+                    Dropdown(
+                        hint_text="選擇車站",
+                        height=80,
+                        width=150,
+                        options=[
+                            dropdown.Option("台北車站"),
+                            dropdown.Option("淡水"),
+                            dropdown.Option("石牌"),
+                            dropdown.Option("大安")
+                        ],
+                    ),
+                    ElevatedButton(text="Add", on_click=self.dropdown_btn_add_clicked)
+                ],
+                alignment='center',
+                vertical_alignment="center",
+            ),
+            alignment=alignment.center,
+        )
+
+        self.rtn_display = Column(
+            controls=[
+                self.title,
+                self.txt_pick,
+                self.dropdownObj,
+                Column(
+                    controls=[
+                        Row(),
+                        Row()
+                    ]
+                )
+            ],
+            alignment='center',
+            horizontal_alignment='center',
+        )
+
+        return self.rtn_display
+
+    def dropdown_btn_add_clicked(self, e):
+
+        self.update()
 
     def update(self):
         super().update()
@@ -125,7 +196,8 @@ class DropdownMenu(UserControl):
 class MainApp(UserControl):
     def __init__(self):
         super().__init__()
-        self.main_display = InitialPage()
+        # Adding status variable here #
+        self.main_display = DropdownMenu()
 
     def build(self):
         return self.main_display
