@@ -117,13 +117,57 @@ class InitialPage(UserControl):
 '''
 
 
+class StationObj(UserControl):  # The bubble which pushed to the page every single click on the ADD button
+    def __init__(self, name, delete_station):
+        super().__init__()
+        self.name = name  # Name of the added station
+        self.delete_station = delete_station  # Function to delete the station bubble
+        self.btn_delete = IconButton(
+            icons.DELETE_OUTLINE,
+            tooltip="Delete this station",
+            on_click=self.btn_delete_clicked,
+            icon_color=colors.RED_700,
+        )
+        self.rtn_display = None
+
+    def build(self):
+        self.rtn_display = Container(
+            content=Row(
+                controls=[
+                    Text(
+                        value=self.name,
+                        size=20,
+                        weight='normal',
+                        color=colors.BLACK45
+                    ),
+                    self.btn_delete,
+                ],
+                alignment='spaceBetween',
+                vertical_alignment='center',
+            ),
+            width=150,
+            height=50,
+            alignment=alignment.center,
+            bgcolor=colors.WHITE70,
+            border_radius=5,
+        )
+
+        return self.rtn_display
+
+    def btn_delete_clicked(self, e):
+        self.delete_station(self)
+
+    def update(self):
+        super().update()
+
+
 class DropdownMenu(UserControl):
     def __init__(self):
         super().__init__()
         self.title = None
         self.txt_pick = None
         self.dropdownObj = None
-        
+        self.rStations = Row(wrap=True, scroll="always")
         self.rtn_display = None
 
     def build(self):
@@ -159,10 +203,10 @@ class DropdownMenu(UserControl):
                             dropdown.Option("大安")
                         ],
                     ),
-                    ElevatedButton(text="Add", on_click=self.dropdown_btn_add_clicked)
+                    ElevatedButton(text="Add", on_click=self.btn_add_clicked)
                 ],
                 alignment='center',
-                vertical_alignment="center",
+                vertical_alignment='center',
             ),
             alignment=alignment.center,
         )
@@ -172,12 +216,7 @@ class DropdownMenu(UserControl):
                 self.title,
                 self.txt_pick,
                 self.dropdownObj,
-                Column(
-                    controls=[
-                        Row(),
-                        Row()
-                    ]
-                )
+                self.rStations,
             ],
             alignment='center',
             horizontal_alignment='center',
@@ -185,8 +224,14 @@ class DropdownMenu(UserControl):
 
         return self.rtn_display
 
-    def dropdown_btn_add_clicked(self, e):
+    def btn_add_clicked(self, e):
+        name = self.dropdownObj.content.controls[0].value
+        station = StationObj(name, self.delete_station)
+        self.rStations.controls.append(station)
+        self.update()
 
+    def delete_station(self, station):
+        self.rStations.controls.remove(station)
         self.update()
 
     def update(self):
