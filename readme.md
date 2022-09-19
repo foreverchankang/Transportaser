@@ -64,8 +64,7 @@
 
 
 ## About The Project
-<img src="assets/images/productss.png" alt="Logo" width="80" height="80">
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+<img src="assets/images/productss.png" alt="Logo" width="500" height="500">
 
 Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
 
