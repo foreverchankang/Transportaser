@@ -90,9 +90,8 @@ def main(page: Page):
 
 
 flet.app(target=main)
-=======
+
 flet.app(
     target=main,
     assets_dir=f"assets"
 )
-
