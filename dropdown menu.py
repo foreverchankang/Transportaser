@@ -24,7 +24,7 @@ from flet import (
     ProgressRing,
     ProgressBar,
     Dropdown,
-    dropdown
+    dropdown,
 )
 
 '''
@@ -142,13 +142,13 @@ class StationObj(UserControl):  # The bubble which pushed to the page every sing
                     ),
                     self.btn_delete,
                 ],
-                alignment='spaceBetween',
+                alignment='spaceEvenly',
                 vertical_alignment='center',
             ),
-            width=150,
+            width=120,
             height=50,
             alignment=alignment.center,
-            bgcolor=colors.WHITE70,
+            bgcolor=colors.ORANGE_800,
             border_radius=5,
         )
 
@@ -164,9 +164,6 @@ class StationObj(UserControl):  # The bubble which pushed to the page every sing
 class DropdownMenu(UserControl):
     def __init__(self):
         super().__init__()
-        self.title = None
-        self.txt_pick = None
-        self.dropdownObj = None
         self.rStations = Row(wrap=True, scroll="always")
         self.rtn_display = None
 
@@ -194,13 +191,13 @@ class DropdownMenu(UserControl):
                 controls=[
                     Dropdown(
                         hint_text="選擇車站",
-                        height=80,
+                        height=70,
                         width=150,
                         options=[
-                            dropdown.Option("台北車站"),
-                            dropdown.Option("淡水"),
-                            dropdown.Option("石牌"),
-                            dropdown.Option("大安")
+                            dropdown.Option(key='台北車站'),
+                            dropdown.Option(key='淡水'),
+                            dropdown.Option(key='石牌'),
+                            dropdown.Option(key='大安')
                         ],
                     ),
                     ElevatedButton(text="Add", on_click=self.btn_add_clicked)
@@ -211,12 +208,26 @@ class DropdownMenu(UserControl):
             alignment=alignment.center,
         )
 
+        self.btn_transmit = Container(
+            content=ElevatedButton(
+                expand=True,
+                width=200,
+                height=60,
+                text="TRANSMIT",
+                on_click=self.btn_transmit_clicked,
+                icon="start",
+                icon_color="green400",
+            ),
+            margin=margin.only(top=20)
+        )
+
         self.rtn_display = Column(
             controls=[
                 self.title,
                 self.txt_pick,
                 self.dropdownObj,
                 self.rStations,
+                self.btn_transmit
             ],
             alignment='center',
             horizontal_alignment='center',
@@ -226,12 +237,62 @@ class DropdownMenu(UserControl):
 
     def btn_add_clicked(self, e):
         name = self.dropdownObj.content.controls[0].value
+
+        # Prevent to add empty StationObj to rStation list
+        if name is None:
+            return
+
         station = StationObj(name, self.delete_station)
         self.rStations.controls.append(station)
+
+        # Remove the option from dropdown if it is added to the rStation list
+        d = self.dropdownObj.content.controls[0]
+        for opt in d.options:
+            if opt.key == name:
+                d.options.remove(opt)
+                break
+
         self.update()
 
     def delete_station(self, station):
         self.rStations.controls.remove(station)
+
+        # Add the station back when it is removed from rStations list
+        d = self.dropdownObj.content.controls[0]
+        d.options.append(dropdown.Option(key=station.name))
+
+        self.update()
+
+    def btn_transmit_clicked(self, e):
+        self.btn_transmit.content.disabled = True
+
+        # Loading animation
+        self.rtn_display.controls.append(
+            Container(
+                content=ProgressRing(
+                    width=35,
+                    height=35,
+                    stroke_width=10
+                ),
+                margin=margin.only(top=20)
+            )
+        )
+        self.update()
+        sleep(3)
+        self.rtn_display.controls.pop()
+
+        # Completion text
+        self.rtn_display.controls.append(
+            Container(
+                content=Text(
+                    "Transmission Completed",
+                    size=40,
+                    color=colors.GREEN_300,
+                    weight="normal"
+                )
+            )
+        )
+
         self.update()
 
     def update(self):
