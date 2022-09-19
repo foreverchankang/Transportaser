@@ -77,7 +77,7 @@ This is the repo for Transportaser Project, a wearable device that uses AI voice
 
 ### Built With
 
-* [![Arduino][Arduino]][Arduino-url]
+* [![Arduino][Arduino]][[Arduino-url](https://www.arduino.cc/)]
 * [![React][React.js]][React-url]
 * [![Vue][Vue.js]][Vue-url]
 * [![Angular][Angular.io]][Angular-url]
