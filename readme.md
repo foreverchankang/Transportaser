@@ -69,7 +69,7 @@
 <img src="assets/images/productss.png" alt="Logo" width="500" height="500">
 </div>
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+This is the repo for Transportaser Project, a wearable device that uses AI voice recognition to interpret station stops, along with its accompanying web app written in Flet: a Dart framework in python, used to communicate with the device through Bluetooth and the PySerial Library. It will include the sketch code for arduino, the executable companion app itself, and a guide on how to replicate the hardware. In this case, we are using a Arduino Nano BLE 33 Multisensor board to achieve a POC.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -77,7 +77,7 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 
 ### Built With
 
-* [![Next][Next.js]][Next-url]
+* [![Arduino][Arduino]][Arduino-url]
 * [![React][React.js]][React-url]
 * [![Vue][Vue.js]][Vue-url]
 * [![Angular][Angular.io]][Angular-url]
