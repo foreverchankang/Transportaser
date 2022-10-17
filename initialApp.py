@@ -257,15 +257,20 @@ class MainApp(UserControl):
         self.connection_status.content.value = 'Connected'
         self.connection_status.content.color = colors.GREEN_300
         self.update()
-
+        sleep(1)
         self.status = 'menu'
-        sleep(3)
+        self.clear()
+        self.main_display.controls.append(self.title_2)
+        self.main_display.controls.append(self.txt_pick)
+        self.main_display.controls.append(self.dropdownObj)
+        self.main_display.controls.append(self.rStations)
+        self.main_display.controls.append(self.btn_transmit)
         self.update()
 
     def build(self):
         if self.status == 'root':
             self.clear()
-            return Column(
+            self.main_display = Column(
                 controls=[
                     self.title,
                     self.img,
@@ -275,9 +280,10 @@ class MainApp(UserControl):
                 alignment='center',
                 horizontal_alignment='center'
             )
+            return self.main_display
         elif self.status == 'menu':
             self.clear()
-            return Column(
+            self.main_display = Column(
                 controls=[
                     self.title_2,
                     self.txt_pick,
@@ -288,6 +294,7 @@ class MainApp(UserControl):
                 alignment='center',
                 horizontal_alignment='center'
             )
+            return self.main_display
 
     def clear(self):
         for c in self.main_display.controls:
