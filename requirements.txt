@@ -1,2 +1,2 @@
-flet
-pyserial
+flet==0.2.4
+bleak~=0.19.5
