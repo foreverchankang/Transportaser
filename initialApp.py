@@ -1,4 +1,5 @@
 import flet
+import threading
 from time import sleep
 from flet import (
     Column,
@@ -26,6 +27,145 @@ from flet import (
     Dropdown,
     dropdown,
 )
+
+import asyncio
+import bleak as BleakScanner
+
+# These values have been randomly generated - they must match between the Central and Peripheral devices
+# Any changes you make here must be suitably made in the Arduino program as well
+
+RED_LED_UUID = '13012F01-F8C3-4F4A-A8F4-15CD926DA146'
+GREEN_LED_UUID = '13012F02-F8C3-4F4A-A8F4-15CD926DA146'
+BLUE_LED_UUID = '13012F03-F8C3-4F4A-A8F4-15CD926DA146'
+
+on_value = bytearray([0x01])
+off_value = bytearray([0x00])
+
+RED = False
+GREEN = False
+BLUE = False
+client = None
+
+def getValue(on):
+    if on:
+        return on_value
+    else:
+        return off_value
+
+
+async def setColor(val):
+    global RED, GREEN, BLUE, client
+
+    # val = input('Enter rgb to toggle red, green and blue LEDs :')
+    # print(val)
+
+    if 'r' in val:
+        RED = not RED
+        await client.write_gatt_char(RED_LED_UUID, getValue(RED))
+    if 'g' in val:
+        GREEN = not GREEN
+        await client.write_gatt_char(GREEN_LED_UUID, getValue(GREEN))
+    if 'b' in val:
+        BLUE = not BLUE
+        await client.write_gatt_char(BLUE_LED_UUID, getValue(BLUE))
+
+
+async def sendStation(val):
+    global RED, GREEN, BLUE, client
+    if val == "石牌":
+        RED = not RED
+        await client.write_gatt_char(RED_LED_UUID, getValue(RED))
+    if val == "台北車站":
+        GREEN = not GREEN
+        await client.write_gatt_char(GREEN_LED_UUID, getValue(GREEN))
+    if val == "淡水":
+        BLUE = not BLUE
+        await client.write_gatt_char(BLUE_LED_UUID, getValue(BLUE))
+
+async def find_device():
+    # print('ProtoStax Arduino Nano BLE LED Peripheral Central Service')
+    # print('Looking for Arduino Nano 33 BLE Sense Peripheral Device...')
+
+    found = False
+    devices = await BleakScanner.discover()
+    for d in devices:
+        # print(d)
+        if 'Arduino' in d.name:
+            print('Found Arduino Nano 33 BLE Sense Peripheral')
+            found = True
+            return d
+
+    if not found:
+        print('\nCould not find Arduino Nano 33 BLE Sense Peripheral')
+        return None
+
+
+async def make_connection(d, app):
+    global RED, GREEN, BLUE, client
+    async with BleakScanner.BleakClient(d.address) as client:
+        print(f'Connected to {d.address}')
+
+        app.main_display.controls.pop()
+        app.connection_status.content.value = 'Connected'
+        app.connection_status.content.color = colors.GREEN_300
+        app.update()
+
+        sleep(1)
+        app.status = 'menu'
+
+        app.clear()
+
+        """ Draw the menu """
+        app.main_display.controls.append(app.txt_pick)
+        app.main_display.controls.append(app.dropdownObj)
+        app.main_display.controls.append(app.rStations)
+        app.main_display.controls.append(app.btn_transmit)
+        app.update()
+
+        val = await client.read_gatt_char(RED_LED_UUID)
+        if val == on_value:
+            print('RED ON')
+            RED = True
+        else:
+            print('RED OFF')
+            RED = False
+
+        val = await client.read_gatt_char(GREEN_LED_UUID)
+        if val == on_value:
+            print('GREEN ON')
+            GREEN = True
+        else:
+            print('GREEN OFF')
+            GREEN = False
+
+        val = await client.read_gatt_char(BLUE_LED_UUID)
+        if val == on_value:
+            print('BLUE ON')
+            BLUE = True
+        else:
+            print('BLUE OFF')
+            BLUE = False
+
+        while True:
+            val = input('Enter rgb to toggle red, green and blue LEDs :')
+            print(val)
+            if 'q' in val:
+                break
+            await setColor(val)
+
+
+class BLE_Connection(threading.Thread):
+    def __init__(self, device):
+        threading.Thread.__init__(self)
+        self.device = device
+
+    def run(self):
+        try:
+            asyncio.run(make_connection(self.device))
+        except KeyboardInterrupt:
+            print('\nReceived Keyboard Interrupt')
+        finally:
+            print('\nBLE_connection program finished')
 
 
 class StationObj(UserControl):  # The bubble which pushed to the page every single click on the ADD button
@@ -179,6 +319,7 @@ class MainApp(UserControl):
 
     def btn_add_clicked(self, e):
         name = self.dropdownObj.content.controls[0].value
+        # print(name)
 
         # Prevent to add empty StationObj to rStation list
         if name is None:
@@ -220,7 +361,17 @@ class MainApp(UserControl):
             )
         )
         self.update()
+
+        print("Transmitting : ", end='')
+        for s in self.rStations.controls:
+            print(s.name, end=' ')
+        print('\n')
+
         sleep(3)
+
+        for s in self.rStations.controls:
+            asyncio.run(sendStation(s.name))
+
         self.main_display.controls.pop()
 
         # Completion text
@@ -235,6 +386,10 @@ class MainApp(UserControl):
             )
         )
 
+        self.btn_transmit.content.disabled = False
+        self.update()
+        sleep(3)
+        self.main_display.controls.pop()
         self.update()
 
     def btn_pair_clicked(self, e):
@@ -252,19 +407,26 @@ class MainApp(UserControl):
             )
         )
         self.update()
-        sleep(3)
-        self.main_display.controls.pop()
-        self.connection_status.content.value = 'Connected'
-        self.connection_status.content.color = colors.GREEN_300
-        self.update()
-        sleep(1)
-        self.status = 'menu'
-        self.clear()
-        self.main_display.controls.append(self.title_2)
-        self.main_display.controls.append(self.txt_pick)
-        self.main_display.controls.append(self.dropdownObj)
-        self.main_display.controls.append(self.rStations)
-        self.main_display.controls.append(self.btn_transmit)
+        device = None
+        device = asyncio.run(find_device())
+        asyncio.run(make_connection(device, self))
+
+        '''
+        if device is not None:
+            asyncio.run(make_connection(device, self))
+            """
+            ble_connection = BLE_Connection(device)
+            ble_connection.start()
+            """
+            self.main_display.controls.pop()
+            self.connection_status.content.value = 'Connected'
+            self.connection_status.content.color = colors.GREEN_300
+        '''
+        if device is None:
+            self.main_display.controls.pop()
+            self.connection_status.content.value = 'Connection Failed'
+            self.connection_status.content.value = colors.RED_500
+        print("make_connection finished!")
         self.update()
 
     def build(self):
@@ -298,7 +460,7 @@ class MainApp(UserControl):
 
     def clear(self):
         for c in self.main_display.controls:
-            self.main_display.controls.remove(c)
+            self.main_display.controls.pop()
 
     def update(self):
         super().update()
